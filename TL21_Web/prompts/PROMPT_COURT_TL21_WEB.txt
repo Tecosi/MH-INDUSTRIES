@@ -1,0 +1,46 @@
+🚀 DÉVELOPPEMENT TL21 WEB - APPLICATION DE GESTION DE PRODUCTION
+
+Bonjour ! Je veux créer une application web moderne pour remplacer mon application WinDev TL21.
+
+📦 PROJET EXISTANT
+- GitHub : https://github.com/Tecosi/MH-INDUSTRIES
+- Maquettes d'interface (5 écrans) : Déjà créées
+- Architecture technique : Validée (React + Node.js + HFSQL via ODBC)
+- Code source WinDev : 59 fichiers extraits et documentés
+
+🎯 OBJECTIF
+Créer un prototype fonctionnel avec :
+1. Connexion à la base HFSQL (via ODBC)
+2. Écran principal : Table de production interactive
+3. Synchronisation temps réel (WebSockets)
+4. Notifications non intrusives
+5. Gestion des conflits (verrouillage optimiste)
+
+📊 BASE DE DONNÉES HFSQL
+Table principale : Prod_TL21
+- IDProd_TL21 (INT, PK)
+- Date, Ordre, Client, Affaire, Commande, PIECE, DESA
+- QTEREST (DECIMAL), Couleur (VARCHAR)
+- Modifie_par (VARCHAR), Version (DATETIME)
+
+🛠️ STACK
+- Frontend : React + TypeScript + TailwindCSS
+- Backend : Node.js + Express + Socket.io
+- BDD : HFSQL Classic (via ODBC)
+
+⚠️ PRÉFÉRENCES IMPORTANTES
+✅ Saisie concurrente autorisée (pas de blocage)
+✅ Notifications non intrusives (compteur + panneau)
+✅ Avertissement si conflit mais pas de blocage
+✅ Indicateurs de présence (avatars sur lignes en édition)
+✅ Accumulation des notifications pour opérations en masse
+
+🚀 COMMENCER PAR
+1. Cloner le repo : gh repo clone Tecosi/MH-INDUSTRIES
+2. Créer TL21_Web/ avec React + Node.js
+3. Configurer la connexion ODBC HFSQL
+4. Implémenter l'écran principal
+
+Consulte la documentation complète dans TL21/docs/ et les maquettes si besoin.
+
+Prêt à démarrer ? 🎯
