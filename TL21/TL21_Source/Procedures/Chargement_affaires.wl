@@ -1,0 +1,5 @@
+procédure Chargement_affaires()
+HExécuteRequête(REQ_Seletion_Affaires,hRequêteDéfaut,SAI_Du,SAI_Au)
+TableAffiche(TABLE_vol1_Seletion_Affaires)
+Procédure locale Cherche_Doc
+

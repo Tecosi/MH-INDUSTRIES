@@ -52,6 +52,26 @@ TL21 est une application WinDev permettant à plusieurs utilisateurs de gérer s
 
 ---
 
+## 💾 Code Source
+
+📁 **[Code Source WLangage](./TL21_Source/)**
+
+- **59 fichiers sources** extraits et organisés
+- **~16 000 lignes de code** WLangage
+- **6 fenêtres** : FEN_Principale, FEN_Gestion_utilisateurs, etc.
+- **52 procédures** : dont 27 procédures Socket_*
+- **1 classe** : Classe1
+- **Structure claire** : Fenetres/, Procedures/, Classes/, Etats/
+
+📋 **[Rapport de Validation](./TL21_Source/RAPPORT_VALIDATION.md)**
+
+- Validation complète du code extrait
+- Vérification contre la documentation
+- 129 lignes de code commenté obsolète supprimées
+- Architecture conforme et prête pour WinDev 2025
+
+---
+
 ## 📚 Documentation
 
 ### Pour les Utilisateurs
