@@ -387,99 +387,242 @@ Ajout réussi : "
 + nbafftab + " affaire(s) ajoutée(s)", toastLong, cvMilieu, chCentre)
 Clic sur BTN_AjoutLigne
 // ═══════════════════════════════════════════════════════════════
-// MARQUER LE DÉBUT D'UNE SAISIE
+// BOUTON BTN_AjoutLigne - AVEC DUPLICATION MULTIPLE
 // ═══════════════════════════════════════════════════════════════
-gbSaisieEnCours
-= Vrai
-gbDonnéesModifiées
-= Faux
+
+gbSaisieEnCours = Vrai
+gbDonnéesModifiées = Faux
+
 // ═══════════════════════════════════════════════════════════════
-// VÉRIFIER QU'UNE DATE EST SÉLECTIONNÉE
+// 1. VÉRIFIER QU'UNE DATE EST SÉLECTIONNÉE
 // ═══════════════════════════════════════════════════════════════
 si SAI_DatePrevi = "" alors
-Erreur("Veuillez sélectionner une date avant d'ajouter une ligne.")
-gbSaisieEnCours = Faux
-retour
+	Erreur("Veuillez sélectionner une date avant d'ajouter une ligne.")
+	gbSaisieEnCours = Faux
+	retour
 fin
+
 // ═══════════════════════════════════════════════════════════════
-// DEMANDER CONFIRMATION
+// 2. AFFICHER UN MENU CONTEXTUEL POUR CHOISIR L'ACTION
 // ═══════════════════════════════════════════════════════════════
-si OuiNon(1, "Voulez-vous ajouter une nouvelle ligne ?") = 1 alors
-// ───────────────────────────────────────────────────────────
-// ENCAPSULATION POUR HSurveille
-// ───────────────────────────────────────────────────────────
+nChoix est un entier = Dialogue("Voulez-vous créer une nouvelle ligne vide ou Dupliquer la(les) ligne(s) sélectionnée(s) ?")
+
+// Si l'utilisateur annule (0 = aucun choix)
+si nChoix = 0 alors
+	gbSaisieEnCours = Faux
+	retour
+fin
+
+// ═══════════════════════════════════════════════════════════════
+// 3. TRAITER LE CHOIX
+// ═══════════════════════════════════════════════════════════════
 gbModificationParMoiMeme = Vrai
-// ───────────────────────────────────────────────────────────
-// INITIALISER L'ENREGISTREMENT
-// ───────────────────────────────────────────────────────────
-HRAZ(Prod_TL21)
-// ───────────────────────────────────────────────────────────
-// AFFECTER LES VALEURS
-// ───────────────────────────────────────────────────────────
-Prod_TL21.Date
-= SAI_DatePrevi
-Prod_TL21.Ordre
-= 99999 // Valeur temporaire, sera renuméroté
-Prod_TL21.Client
-= ""
-Prod_TL21.Affaire
-= 0
-Prod_TL21.Commande
-= ""
-Prod_TL21.PIECE
-= ""
-Prod_TL21.DESA
-= ""
-Prod_TL21.QTEREST
-= 0
-Prod_TL21.FLAG
-= ""
-Prod_TL21.Doc
-= "" // Pas de documents pour l'instant
-Prod_TL21.Modifie_par = gsUtilisateurActuel
-// ───────────────────────────────────────────────────────────
-// AJOUTER L'ENREGISTREMENT
-// ───────────────────────────────────────────────────────────
-si HAjoute(Prod_TL21) alors
-// ✅
-RÉCUPÉRER L'ID DE LA LIGNE AJOUTÉE
-nIDNouvelleLigne est un entier sur 8 octets= Prod_TL21.IDProd_TL21
-// Convertir la date pour la renumérotation
-dDateAjout est une Date = SAI_DatePrevi // Renumérotation automatique RenumeroterOrdresPourDate(dDateAjout) // ✅ RAFRAÎCHIR LA TABLE TableAffiche(TABLE_Prod_TL21, taRéExécuteRequete) TableTrie(TABLE_Prod_TL21, "+COL_Ordre") // ✅ POSITIONNER LE FOCUS SUR LA NOUVELLE LIGNE pour i = 1 à TableOccurrence(TABLE_Prod_TL21)
-si TABLE_Prod_TL21.COL_ID[i] = nIDNouvelleLigne alors
-// Sélectionner la ligne
-TableSelectPlus(TABLE_Prod_TL21, i)
-// ✅
-METTRE LE FOCUS SUR LA PREMIÈRE COLONNE ÉDITABLE
-// (par exemple, COL_Client ou COL_Affaire)
-TableSelectPlus(TABLE_Prod_TL21, i, "COL_Client")
-DonneFocusEtRetourUtilisateur(TABLE_Prod_TL21)
-sortir
+
+// ───────────────────────────────────────────────────────────────
+// 3.1 CALCULER LE NOUVEL ORDRE DE DÉPART (max + 1)
+// ───────────────────────────────────────────────────────────────
+nNouvelOrdre est un entier = 1
+
+pour tout Prod_TL21 avec Date = SAI_DatePrevi
+	si Prod_TL21.Ordre > nNouvelOrdre alors
+		nNouvelOrdre = Prod_TL21.Ordre
+	fin
 fin
-fin
-// Réinitialiser les indicateurs
-gbDonnéesModifiées = Faux
-ToastAffiche("✅
-Ligne ajoutée - Vous pouvez saisir les données"
-chCentre)
+
+nNouvelOrdre++
+
+// ───────────────────────────────────────────────────────────────
+// 3.2 PRÉPARER L'ENREGISTREMENT SELON LE CHOIX
+// ───────────────────────────────────────────────────────────────
+si nChoix = 2 alors
+	// ═══════════════════════════════════════════════════════════
+	// OPTION 2 : DUPLIQUER LA/LES LIGNE(S) SÉLECTIONNÉE(S)
+	// ═══════════════════════════════════════════════════════════
+	
+	// Récupérer toutes les lignes sélectionnées
+	tabLignesSelectionnees est un tableau d'entiers
+	nIndice est un entier = TableSelectOccurrence(TABLE_Prod_TL21)
+	
+	si nIndice = 0 alors
+		Erreur("Aucune ligne sélectionnée. Impossible de dupliquer.")
+		gbModificationParMoiMeme = Faux
+		gbSaisieEnCours = Faux
+		retour
+	fin
+	
+	// Récupérer les indices de toutes les lignes sélectionnées
+	pour i = 1 à nIndice
+		nLigneSelectionnee est un entier = TableSelect(TABLE_Prod_TL21, i)
+		TableauAjoute(tabLignesSelectionnees, nLigneSelectionnee)
+	fin
+	
+	// Dupliquer chaque ligne sélectionnée
+	nDernierID est un entier sur 8 octets = 0
+	
+	pour tout nLigneSelectionnee de tabLignesSelectionnees
+		// Récupérer l'ID de la ligne sélectionnée
+		nIDSource est un entier sur 8 octets = TABLE_Prod_TL21.COL_ID[nLigneSelectionnee]
+		
+		// Lire l'enregistrement source
+		si HLitRecherchePremier(Prod_TL21, IDProd_TL21, nIDSource) alors
+			// Sauvegarder les valeurs dans des variables temporaires
+			sClient est une chaîne = Prod_TL21.Client
+			nAffaire est un entier = Prod_TL21.Affaire
+			sCommande est une chaîne = Prod_TL21.Commande
+			sPIECE est une chaîne = Prod_TL21.PIECE
+			sDESA est une chaîne = Prod_TL21.DESA
+			nQTEREST est un entier = Prod_TL21.QTEREST
+			sCouleur est une chaîne = Prod_TL21.Couleur
+			sR est une chaîne = Prod_TL21.R
+			sBalancelle est une chaîne = Prod_TL21.Balancelle
+			sReprise est une chaîne = Prod_TL21.Reprise
+			sObservations est une chaîne = Prod_TL21.Observations
+			rEpaisseuravant est un réel = Prod_TL21.Epaisseuravant
+			rEpaisseurapres est un réel = Prod_TL21.Epaisseurapres
+			sHSF1Ereb est une chaîne = Prod_TL21.HSF1Ereb
+			sHSFDerb est une chaîne = Prod_TL21.HSFDerb
+			sVconvoyeur est une chaîne = Prod_TL21.Vconvoyeur
+			hHeureVC est une Heure = Prod_TL21.HeureVC
+			bCT est un booléen = Prod_TL21.CT
+			sDetailCT est une chaîne = Prod_TL21.DetailCT
+			sDoc est une chaîne = Prod_TL21.Doc
+			sFLAG est une chaîne = Prod_TL21.FLAG
+			
+			// Initialiser un nouvel enregistrement
+			HRAZ(Prod_TL21)
+			
+			// Copier les valeurs sauvegardées
+			Prod_TL21.Client = sClient
+			Prod_TL21.Affaire = nAffaire
+			Prod_TL21.Commande = sCommande
+			Prod_TL21.PIECE = sPIECE
+			Prod_TL21.DESA = sDESA
+			Prod_TL21.QTEREST = nQTEREST
+			Prod_TL21.Couleur = sCouleur
+			Prod_TL21.R = sR
+			Prod_TL21.Balancelle = sBalancelle
+			Prod_TL21.Reprise = sReprise
+			Prod_TL21.Observations = sObservations
+			Prod_TL21.Epaisseuravant = rEpaisseuravant
+			Prod_TL21.Epaisseurapres = rEpaisseurapres
+			Prod_TL21.HSF1Ereb = sHSF1Ereb
+			Prod_TL21.HSFDerb = sHSFDerb
+			Prod_TL21.Vconvoyeur = sVconvoyeur
+			Prod_TL21.HeureVC = hHeureVC
+			Prod_TL21.CT = bCT
+			Prod_TL21.DetailCT = sDetailCT
+			Prod_TL21.Doc = sDoc
+			Prod_TL21.FLAG = sFLAG
+			
+			// Régénérer les champs système
+			Prod_TL21.Date = SAI_DatePrevi
+			Prod_TL21.Ordre = nNouvelOrdre
+			Prod_TL21.Modifie_par = gsUtilisateurActuel
+			Prod_TL21.Version = DateHeureSys()
+			
+			// Ajouter l'enregistrement
+			si HAjoute(Prod_TL21) alors
+				nDernierID = Prod_TL21.IDProd_TL21
+				Socket_Envoyer("add", nDernierID)
+				
+				// Incrémenter l'ordre pour la prochaine ligne
+				nNouvelOrdre++
+			sinon
+				Erreur("Erreur lors de l'ajout de la ligne " + nLigneSelectionnee + " : " + HErreurInfo())
+			fin
+		fin
+	fin
+	
+	// Rafraîchir et positionner sur la dernière ligne ajoutée
+	TableAffiche(TABLE_Prod_TL21, taRéExécuteRequete)
+	TableTrie(TABLE_Prod_TL21, "+COL_Ordre")
+	
+	// Positionner le focus sur la dernière ligne dupliquée
+	si nDernierID > 0 alors
+		pour i = 1 à TableOccurrence(TABLE_Prod_TL21)
+			si TABLE_Prod_TL21.COL_ID[i] = nDernierID alors
+				TableSelectPlus(TABLE_Prod_TL21, i)
+				DonneFocusEtRetourUtilisateur(TABLE_Prod_TL21)
+				sortir
+			fin
+		fin
+	fin
+	
+	gbDonnéesModifiées = Faux
+	
+	si nIndice = 1 alors
+		ToastAffiche("✅ Ligne dupliquée avec succès", toastCourt, cvMilieu, chCentre)
+	sinon
+		ToastAffiche("✅ " + nIndice + " lignes dupliquées avec succès", toastCourt, cvMilieu, chCentre)
+	fin
+	
 sinon
-// Gestion des erreurs
-si HErreurDoublon() alors
-Erreur("Cette ligne existe déjà.")
-sinon
-Erreur("Erreur lors de l'ajout : " + HErreurInfo())
+	// ═══════════════════════════════════════════════════════════
+	// OPTION 1 : CRÉER UNE NOUVELLE LIGNE VIDE
+	// ═══════════════════════════════════════════════════════════
+	
+	HRAZ(Prod_TL21)
+	
+	// Affecter les valeurs minimales pour une ligne vide
+	Prod_TL21.Date = SAI_DatePrevi
+	Prod_TL21.Ordre = nNouvelOrdre
+	Prod_TL21.Client = ""
+	Prod_TL21.Affaire = 0
+	Prod_TL21.Commande = ""
+	Prod_TL21.PIECE = ""
+	Prod_TL21.DESA = ""
+	Prod_TL21.QTEREST = 0
+	Prod_TL21.Couleur = ""
+	Prod_TL21.R = ""
+	Prod_TL21.Balancelle = ""
+	Prod_TL21.Reprise = ""
+	Prod_TL21.Observations = ""
+	Prod_TL21.Epaisseuravant = 0
+	Prod_TL21.Epaisseurapres = 0
+	Prod_TL21.HSF1Ereb = ""
+	Prod_TL21.HSFDerb = ""
+	Prod_TL21.Vconvoyeur = ""
+	Prod_TL21.HeureVC = "00:00"
+	Prod_TL21.CT = Faux
+	Prod_TL21.DetailCT = ""
+	Prod_TL21.Doc = ""
+	Prod_TL21.FLAG = ""
+	Prod_TL21.Modifie_par = gsUtilisateurActuel
+	Prod_TL21.Version = DateHeureSys()
+	
+	// Ajouter l'enregistrement
+	si HAjoute(Prod_TL21) alors
+		nIDNouvelleLigne est un entier sur 8 octets = Prod_TL21.IDProd_TL21
+		
+		Socket_Envoyer("add", nIDNouvelleLigne)
+		
+		TableAffiche(TABLE_Prod_TL21, taRéExécuteRequete)
+		TableTrie(TABLE_Prod_TL21, "+COL_Ordre")
+		
+		// Positionner le focus sur la nouvelle ligne
+		pour i = 1 à TableOccurrence(TABLE_Prod_TL21)
+			si TABLE_Prod_TL21.COL_ID[i] = nIDNouvelleLigne alors
+				TableSelectPlus(TABLE_Prod_TL21, i)
+				DonneFocusEtRetourUtilisateur(TABLE_Prod_TL21)
+				sortir
+			fin
+		fin
+		
+		gbDonnéesModifiées = Faux
+		ToastAffiche("✅ Nouvelle ligne créée - Vous pouvez saisir les données", toastCourt, cvMilieu, chCentre)
+	sinon
+		si HErreurDoublon() alors
+			Erreur("Cette ligne existe déjà.")
+		sinon
+			Erreur("Erreur lors de l'ajout : " + HErreurInfo())
+		fin
+	fin
 fin
-fin
-, toastCourt, cvMilieu,
-// ───────────────────────────────────────────────────────────
-// ───────────────────────────────────────────────────────────
+
+// ═══════════════════════════════════════════════════════════════
+// DÉSENCAPSULATION
+// ═══════════════════════════════════════════════════════════════
 gbModificationParMoiMeme = Faux
-fin
-// ═══════════════════════════════════════════════════════════════
-// MARQUER LA FIN DE LA SAISIE
-// ═══════════════════════════════════════════════════════════════
-// Note : On garde gbSaisieEnCours = Vrai car l'utilisateur va saisir
-// Il sera remis à Faux dans l'événement "Sortie de saisie" de la table
 Initialisation de BTN_Coul1
 // Version 1
 // Description
@@ -948,96 +1091,124 @@ EnregistrerLigneModifiee()
 TableurStyleSélection(TBLR_Previ, tblrCouleurTexte, RougeClair)
 Clic sur BTN_SupLigne
 // ═══════════════════════════════════════════════════════════════
-// ÉVÉNEMENT : Clic sur BTN_SupLigne
+// BOUTON BTN_SupLigne - AVEC SUPPRESSION MULTIPLE ET GESTION DU FOCUS
 // ═══════════════════════════════════════════════════════════════
+
 // ═══════════════════════════════════════════════════════════════
-// MARQUER LE DÉBUT D'UNE SAISIE
+// 1. VÉRIFIER QU'AU MOINS UNE LIGNE EST SÉLECTIONNÉE
 // ═══════════════════════════════════════════════════════════════
-gbSaisieEnCours = Vrai
-// ═══════════════════════════════════════════════════════════════
-// RÉCUPÉRER LA LIGNE SÉLECTIONNÉE
-// ═══════════════════════════════════════════════════════════════
-numlign est un entier = TableSelect(TABLE_Prod_TL21)
-si numlign = -1 alors
-Erreur("Veuillez sélectionner une ligne à supprimer.")
-gbSaisieEnCours = Faux
-retour
+nNbLignesSelectionnees est un entier = TableSelectOccurrence(TABLE_Prod_TL21)
+
+si nNbLignesSelectionnees = 0 alors
+	Erreur("Veuillez sélectionner au moins une ligne à supprimer.")
+	retour
 fin
+
 // ═══════════════════════════════════════════════════════════════
-// DEMANDER CONFIRMATION
+// 2. MÉMORISER LA POSITION DE LA PREMIÈRE LIGNE SÉLECTIONNÉE
 // ═══════════════════════════════════════════════════════════════
-si OuiNon(0, "Êtes-vous certain de vouloir supprimer la ligne " + numlign + " ?") = 1 alors
-// ───────────────────────────────────────────────────────────
-// RÉCUPÉRER L'ID ET LA DATE AVANT SUPPRESSION
-// ───────────────────────────────────────────────────────────
-nID est un entier = TABLE_Prod_TL21.COL_ID[numlign]
-dDate est une Date = TABLE_Prod_TL21.COL_Date[numlign] // ─────────────────────────────────────────────────────────── // ENCAPSULATION POUR HSurveille // ─────────────────────────────────────────────────────────── gbModificationParMoiMeme = Vrai
-// ───────────────────────────────────────────────────────────
-// SUPPRIMER L'ENREGISTREMENT
-// ───────────────────────────────────────────────────────────
-si HLitRecherchePremier(Prod_TL21, IDProd_TL21, nID) alors
-si HSupprime(Prod_TL21) alors
-// Renumérotation automatique
-LibererVerrousPourDate(dDate)
-RenumeroterOrdresPourDate(dDate)
-// ✅
-RAFRAÎCHIR LA TABLE
+nPremiereLigneSelectionnee est un entier = TableSelect(TABLE_Prod_TL21, 1)
+
+// ═══════════════════════════════════════════════════════════════
+// 3. DEMANDER CONFIRMATION
+// ═══════════════════════════════════════════════════════════════
+sMessage est une chaîne
+
+si nNbLignesSelectionnees = 1 alors
+	sMessage = "Voulez-vous vraiment supprimer la ligne sélectionnée ?"
+sinon
+	sMessage = "Voulez-vous vraiment supprimer les " + nNbLignesSelectionnees + " lignes sélectionnées ?"
+fin
+
+si OuiNon(Non, sMessage) = Non alors
+	retour
+fin
+
+// ═══════════════════════════════════════════════════════════════
+// 4. ENCAPSULATION POUR HSurveille
+// ═══════════════════════════════════════════════════════════════
+gbModificationParMoiMeme = Vrai
+
+// ═══════════════════════════════════════════════════════════════
+// 5. RÉCUPÉRER LES ID DES LIGNES À SUPPRIMER
+// ═══════════════════════════════════════════════════════════════
+tabIDsASupprimer est un tableau d'entiers sur 8 octets
+
+pour i = 1 à nNbLignesSelectionnees
+	nLigneSelectionnee est un entier = TableSelect(TABLE_Prod_TL21, i)
+	nID est un entier sur 8 octets = TABLE_Prod_TL21.COL_ID[nLigneSelectionnee]
+	TableauAjoute(tabIDsASupprimer, nID)
+fin
+
+// ═══════════════════════════════════════════════════════════════
+// 6. SUPPRIMER CHAQUE LIGNE
+// ═══════════════════════════════════════════════════════════════
+nNbSuppressions est un entier = 0
+nNbErreurs est un entier = 0
+
+pour tout nID de tabIDsASupprimer
+	// Lire l'enregistrement
+	si HLitRecherchePremier(Prod_TL21, IDProd_TL21, nID) alors
+		// Supprimer l'enregistrement
+		si HSupprime(Prod_TL21) alors
+			nNbSuppressions++
+			
+			// Notifier les autres utilisateurs
+			Socket_Envoyer("delete", nID)
+		sinon
+			nNbErreurs++
+			Erreur("Erreur lors de la suppression de la ligne ID " + nID + " : " + HErreurInfo())
+		fin
+	sinon
+		nNbErreurs++
+		Erreur("Impossible de lire la ligne ID " + nID)
+	fin
+fin
+
+// ═══════════════════════════════════════════════════════════════
+// 7. RAFRAÎCHIR LA TABLE
+// ═══════════════════════════════════════════════════════════════
 TableAffiche(TABLE_Prod_TL21, taRéExécuteRequete)
 TableTrie(TABLE_Prod_TL21, "+COL_Ordre")
-// ✅
-RESTAURER LE FOCUS ET LA SÉLECTION
-// Sélectionner la ligne suivante ou la précédente
-nNbLignes est un entier = TableOccurrence(TABLE_Prod_TL21)
-si nNbLignes > 0 alors
-si numlign > nNbLignes alors
-numlign = nNbLignes
+
+// ═══════════════════════════════════════════════════════════════
+// 8. REPOSITIONNER LE FOCUS SUR LA LIGNE SUIVANTE
+// ═══════════════════════════════════════════════════════════════
+nNbLignesRestantes est un entier = TableOccurrence(TABLE_Prod_TL21)
+
+si nNbLignesRestantes > 0 alors
+	// Calculer la nouvelle position du focus
+	nNouvelleLigne est un entier = nPremiereLigneSelectionnee
+	
+	// Si la ligne supprimée était la dernière (ou au-delà), sélectionner la nouvelle dernière
+	si nNouvelleLigne > nNbLignesRestantes alors
+		nNouvelleLigne = nNbLignesRestantes
+	fin
+	
+	// Sélectionner la ligne
+	TableSelectPlus(TABLE_Prod_TL21, nNouvelleLigne)
+	DonneFocusEtRetourUtilisateur(TABLE_Prod_TL21)
 fin
-// Sélectionner la ligne
-TableSelectPlus(TABLE_Prod_TL21, numlign)
-// Donner le focus à la table
+
+// ═══════════════════════════════════════════════════════════════
+// 9. NOTIFICATION DE SUCCÈS
+// ═══════════════════════════════════════════════════════════════
+si nNbSuppressions > 0 alors
+	si nNbSuppressions = 1 alors
+		ToastAffiche("✅ Ligne supprimée avec succès", toastCourt, cvMilieu, chCentre)
+	sinon
+		ToastAffiche("✅ " + nNbSuppressions + " lignes supprimées avec succès", toastCourt, cvMilieu, chCentre)
+	fin
 fin
-ToastAffiche("✅
-Ligne supprimée" , toastCourt, cvMilieu, chCentre)
-sinon
-Erreur("Erreur lors de la suppression : " + HErreurInfo())
+
+si nNbErreurs > 0 alors
+	Erreur(nNbErreurs + " erreur(s) lors de la suppression.")
 fin
-sinon
-Erreur("Impossible de trouver l'enregistrement à supprimer.")
-fin
-// ───────────────────────────────────────────────────────────
-// ───────────────────────────────────────────────────────────
+
+// ═══════════════════════════════════════════════════════════════
+// 10. DÉSENCAPSULATION
+// ═══════════════════════════════════════════════════════════════
 gbModificationParMoiMeme = Faux
-sinon
-// ✅
-L'utilisateur a annulé, redonner le focus à la table
-DonneFocus(TABLE_Prod_TL21)
-fin
-// ═══════════════════════════════════════════════════════════════
-// MARQUER LA FIN DE LA SAISIE
-// ═══════════════════════════════════════════════════════════════
-gbSaisieEnCours
-= Faux
-gbDonnéesModifiées
-= Faux
-si gbActualisationEnAttente = Vrai alors
-nRéponse est un entier = OuiNon(Oui, "✅
-Votre suppression a été enregistrée."
-"Des modification(s) ont été faites par d'autres utilisateurs." + RC + ...
-"Voulez-vous actualiser la table maintenant ?")
-+ RC + RC + ...
-si nRéponse = Oui alors
-TableAffiche(TABLE_Prod_TL21, taRéExécuteRequete)
-gbActualisationEnAttente = Faux
-ToastAffiche("✅
-Table actualisée" , toastCourt, cvMilieu, chCentre)
-// ✅
-RESTAURER LE FOCUS APRÈS L'ACTUALISATION
-si TableOccurrence(TABLE_Prod_TL21) > 0 alors
-TableSelectPlus(TABLE_Prod_TL21, 1)
-DonneFocus(TABLE_Prod_TL21)
-fin
-fin
-fin
 Clic sur BTN_Up
 // Clic sur BTN_UP
 // Récupérer la ligne sélectionnée
