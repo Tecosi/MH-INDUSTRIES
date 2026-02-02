@@ -8,8 +8,8 @@ flowchart TD
     end
     
     subgraph DEVIS["📋 ELABORATION DEVIS"]
-        B1[Support Excel<br/>pour infos techniques]
-        B2[Retranscription dans Clipper<br/>pour nuanciers/gammes]
+        B1[Support Excel devis classiques<br/>OU Excel nuanciers<br/>selon type demande]
+        B2[Retranscription dans Clipper<br/>pour gammes techniques]
         B3[Réalisation devis<br/>+ Validation interne]
     end
     
@@ -23,14 +23,14 @@ flowchart TD
         D2[Vérification conformité<br/>avec devis]
         D3{Tout conforme?}
         D4[Joint documentation<br/>aux gammes]
-        D5[Transmission ADV<br/>+ Logistique]
+        D5[Transmission vers<br/>SERVICE ADV]
         D6[Retour Commerce<br/>pour traiter écarts]
     end
     
-    subgraph ENREGISTREMENT["💾 ENREGISTREMENT"]
-        E1[Saisie manuelle<br/>dans ERP]
-        E2[Création commande client<br/>dans système]
-        E3[Edition documents<br/>production]
+    subgraph ENREGISTREMENT["💾 ENREGISTREMENT ADV"]
+        E1[ADV: Saisie manuelle<br/>commande dans ERP]
+        E2[ADV: Création commande client<br/>dans système]
+        E3[ADV: Edition documents<br/>production]
     end
     
     START --> A1
