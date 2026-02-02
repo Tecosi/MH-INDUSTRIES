@@ -1,0 +1,85 @@
+flowchart TD
+    START([Début: Pièces validées])
+    
+    subgraph EMBALLAGE["📦 EMBALLAGE"]
+        A1[Réception pièces validées<br/>+ documents qualité]
+        A2[Consultation spécifications<br/>emballage client]
+        A3[Emballage adapté<br/>Protection selon pièces]
+        A4[Étiquetage<br/>Traçabilité]
+        A5[Préparation palette<br/>ou caisse]
+    end
+    
+    subgraph EXPEDITION["🚚 EXPEDITION"]
+        B1[Consultation commande<br/>Mode transport]
+        B2{Transport<br/>client?}
+        B3[Organisation transport<br/>Affrètement]
+        B4[Préparation documents<br/>transport]
+        B5[Bon de livraison]
+        B6[Sortie stock ERP]
+        B7[Chargement<br/>Expédition]
+    end
+    
+    subgraph FACTURATION["💰 FACTURATION"]
+        C1[Validation quantités<br/>traitées]
+        C2[Consolidation coûts<br/>Matières / MO / Énergie]
+        C3[Calcul coûts Excel<br/>+ Papier]
+        C4[Saisie montants<br/>dans ERP]
+        C5[Vérification spécifiques<br/>indispensables]
+        C6{Regroupement<br/>factures?}
+        C7[Regroupement<br/>plusieurs commandes]
+        C8[Émission facture]
+        C9[Envoi facture client<br/>Mail / Courrier]
+    end
+    
+    START --> A1
+    A1 --> A2
+    A2 --> A3
+    A3 --> A4
+    A4 --> A5
+    A5 --> B1
+    
+    B1 --> B2
+    B2 -->|Non| B3
+    B2 -->|Oui| B4
+    B3 --> B4
+    B4 --> B5
+    B5 --> B6
+    B6 --> B7
+    
+    B7 --> C1
+    C1 --> C2
+    C2 --> C3
+    C3 --> C4
+    C4 --> C5
+    C5 --> C6
+    C6 -->|Oui| C7
+    C6 -->|Non| C8
+    C7 --> C8
+    C8 --> C9
+    C9 --> END([Fin: Commande clôturée])
+    
+    subgraph PROBLEMES["⚠️ PROBLEMES IDENTIFIES"]
+        P1["🔴 Consolidation coûts manuelle<br/>→ Excel + Papier + ERP"]
+        P2["🔴 Pas d'automatisation calculs<br/>→ Chronophage et erreurs"]
+        P3["🟡 Vigilance spécifiques ERP<br/>→ Intégration forte à préserver"]
+        P4["🟡 Regroupement factures manuel<br/>→ Complexité gestion"]
+    end
+    
+    subgraph OUTILS["🛠️ OUTILS UTILISES"]
+        O1["ERP Clipper"]
+        O2["Excel calculs"]
+        O3["Papier documents"]
+        O4["Mail"]
+    end
+    
+    style START fill:#FF6B6B
+    style END fill:#4ECDC4
+    style EMBALLAGE fill:#E3F2FD
+    style EXPEDITION fill:#FFF9C4
+    style FACTURATION fill:#E8F5E9
+    style PROBLEMES fill:#FFEBEE,stroke:#D32F2F,stroke-width:2px
+    style OUTILS fill:#E0F2F1
+    style P1 fill:#FFCDD2
+    style P2 fill:#FFCDD2
+    style P3 fill:#FFF9C4
+    style P4 fill:#FFF9C4

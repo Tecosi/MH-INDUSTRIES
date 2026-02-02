@@ -1,0 +1,76 @@
+flowchart TD
+    START([Début: Demande Client])
+    
+    subgraph RECEPTION["📥 RECEPTION & ANALYSE"]
+        A1[Réception demande client<br/>Mail / Appel / Portail]
+        A2[Analyse des exigences<br/>• Pièce<br/>• Finition<br/>• Contraintes<br/>• Délais]
+        A3[Consultation documentation<br/>qualité sur réseau]
+    end
+    
+    subgraph DEVIS["📋 ELABORATION DEVIS"]
+        B1[Support Excel<br/>pour infos techniques]
+        B2[Retranscription dans Clipper<br/>pour nuanciers/gammes]
+        B3[Réalisation devis<br/>+ Validation interne]
+    end
+    
+    subgraph ENVOI["📤 ENVOI & SUIVI"]
+        C1[Envoi devis au client]
+        C2{Client accepte?}
+    end
+    
+    subgraph COMMANDE["✅ COMMANDE"]
+        D1[Réception validation<br/>Papier / Mail / PDF]
+        D2[Vérification conformité<br/>avec devis]
+        D3{Tout conforme?}
+        D4[Joint documentation<br/>aux gammes]
+        D5[Transmission ADV<br/>+ Logistique]
+        D6[Retour Commerce<br/>pour traiter écarts]
+    end
+    
+    subgraph ENREGISTREMENT["💾 ENREGISTREMENT"]
+        E1[Saisie manuelle<br/>dans ERP]
+        E2[Création commande client<br/>dans système]
+        E3[Edition documents<br/>production]
+    end
+    
+    START --> A1
+    A1 --> A2
+    A2 --> A3
+    A3 --> B1
+    B1 --> B2
+    B2 --> B3
+    B3 --> C1
+    C1 --> C2
+    
+    C2 -->|Oui| D1
+    C2 -->|Non| END1([Fin: Archivage])
+    
+    D1 --> D2
+    D2 --> D3
+    D3 -->|Oui| D4
+    D3 -->|Non| D6
+    D6 --> D2
+    D4 --> D5
+    D5 --> E1
+    E1 --> E2
+    E2 --> E3
+    E3 --> END2([Fin: Vers Planification])
+    
+    subgraph PROBLEMES["⚠️ PROBLEMES IDENTIFIES"]
+        P1["🔴 Saisies manuelles multiples<br/>→ Risque erreur + Chronophage"]
+        P2["🔴 Documentation non intégrée<br/>→ Fichiers dispersés réseau"]
+        P3["🔴 Fonctionnalités ERP sous-utilisées<br/>→ Pas d'exploitation EDI"]
+    end
+    
+    style START fill:#FF6B6B
+    style END1 fill:#95E1D3
+    style END2 fill:#4ECDC4
+    style RECEPTION fill:#E3F2FD
+    style DEVIS fill:#FFF9C4
+    style ENVOI fill:#F3E5F5
+    style COMMANDE fill:#E8F5E9
+    style ENREGISTREMENT fill:#FFF3E0
+    style PROBLEMES fill:#FFEBEE,stroke:#D32F2F,stroke-width:2px
+    style P1 fill:#FFCDD2
+    style P2 fill:#FFCDD2
+    style P3 fill:#FFCDD2

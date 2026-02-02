@@ -1,0 +1,90 @@
+flowchart TD
+    subgraph INPUT["📥 INPUT - ENTREE INFORMATION"]
+        I1["Demandes clients<br/>Mail / Appel / Portail"]
+        I2["Commandes<br/>Papier / PDF / EDI"]
+        I3["Spécifications techniques<br/>Excel / Papier"]
+        I4["Documentation qualité<br/>Réseau / Classeurs"]
+    end
+    
+    subgraph SAISIE["⌨️ SAISIES MULTIPLES"]
+        S1["Saisie manuelle<br/>Excel devis"]
+        S2["Retranscription<br/>Clipper ERP"]
+        S3["Re-saisie<br/>commandes"]
+        S4["Saisie<br/>gammes/nuanciers"]
+    end
+    
+    subgraph ERP_CORE["💾 ERP CLIPPER"]
+        E1["Base commandes"]
+        E2["Base articles"]
+        E3["Base clients"]
+        E4["Ordres fabrication"]
+        E5["Stocks"]
+        E6["Facturation"]
+    end
+    
+    subgraph PARALLELE["📊 OUTILS PARALLELES NON INTEGRES"]
+        P1["Excel ordonnancement<br/>Partagé chacun son tour"]
+        P2["Excel stocks peinture<br/>Déconnecté ERP"]
+        P3["Excel calculs coûts<br/>Matières/MO/Énergie"]
+        P4["Fichiers réseau<br/>Documentation qualité"]
+        P5["Classeurs papier<br/>Gammes au poste"]
+        P6["Mails appels appro<br/>Communication manuelle"]
+    end
+    
+    subgraph OUTPUT["📤 OUTPUT - SORTIE INFORMATION"]
+        O1["Reporting quotidien<br/>Manuel chronophage"]
+        O2["KPI statiques<br/>Pas de BI"]
+        O3["Documents production<br/>Papier"]
+        O4["Factures<br/>Consolidation manuelle"]
+    end
+    
+    I1 --> S1
+    I2 --> S3
+    I3 --> S4
+    I4 --> P4
+    
+    S1 --> S2
+    S2 --> E1
+    S3 --> E1
+    S4 --> E2
+    
+    E1 --> E4
+    E2 --> E4
+    E3 --> E1
+    E4 --> P1
+    E4 --> E5
+    E5 --> E6
+    
+    P1 -.->|Rupture| E4
+    P2 -.->|Déconnecté| E5
+    P3 -.->|Parallèle| E6
+    P4 -.->|Non intégré| E2
+    P5 -.->|Papier| E4
+    P6 -.->|Manuel| P1
+    
+    E4 --> O3
+    E6 --> O4
+    P1 --> O1
+    P2 --> O1
+    P3 --> O4
+    
+    E1 -.->|Données| O2
+    E5 -.->|Données| O2
+    
+    subgraph FRACTURE["💔 FRACTURE NUMERIQUE"]
+        F1["🔴 Saisies manuelles multiples<br/>→ Risque erreur + Temps perdu"]
+        F2["🔴 Outils parallèles non intégrés<br/>→ Perte productivité"]
+        F3["🔴 Documentation dispersée<br/>→ Accessibilité difficile"]
+        F4["🔴 Reporting manuel<br/>→ Pas de pilotage temps réel"]
+    end
+    
+    style INPUT fill:#FFEBEE,stroke:#D32F2F,stroke-width:2px
+    style SAISIE fill:#FFCDD2,stroke:#C62828,stroke-width:2px
+    style ERP_CORE fill:#E3F2FD,stroke:#1976D2,stroke-width:3px
+    style PARALLELE fill:#FFF9C4,stroke:#F57C00,stroke-width:2px
+    style OUTPUT fill:#E8F5E9,stroke:#388E3C,stroke-width:2px
+    style FRACTURE fill:#FFEBEE,stroke:#D32F2F,stroke-width:3px
+    style F1 fill:#EF5350
+    style F2 fill:#EF5350
+    style F3 fill:#EF5350
+    style F4 fill:#EF5350

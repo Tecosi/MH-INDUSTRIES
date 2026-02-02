@@ -1,0 +1,67 @@
+graph TB
+    subgraph PILOTAGE["🎯 PROCESSUS DE PILOTAGE"]
+        direction LR
+        GROUPE["GROUPE MH<br/>Solution Métallique Globale"]
+        MANAGER["MANAGER FIN'TECH<br/>Clément ROUX"]
+        QUALITE["QUALITE<br/>Hugo BELMONTE"]
+        HSE["HYGIENE SECURITE<br/>ENVIRONNEMENT<br/>Jérémy ESCUDIE"]
+        
+        GROUPE --> MANAGER
+        MANAGER --> QUALITE
+        MANAGER --> HSE
+    end
+    
+    CLIENT_IN["👤 EXIGENCES<br/>CLIENTS"]
+    CLIENT_OUT["👤 SATISFACTION<br/>CLIENTS"]
+    
+    subgraph METIER["⚙️ PROCESSUS METIER"]
+        direction LR
+        
+        subgraph COMMERCE_BLOCK["COMMERCE"]
+            COMMERCE["COMMERCE<br/>Eric PICAUD<br/><br/>• Réception demandes<br/>• Devis<br/>• Commandes"]
+        end
+        
+        subgraph METHODES_BLOCK["METHODES & INDUSTRIALISATION"]
+            METHODES["METHODES &<br/>INDUSTRIALISATION<br/>Gael INNOCENTE<br/><br/>• Gammes techniques<br/>• Dossiers techniques<br/>• Industrialisation"]
+        end
+        
+        subgraph PRODUCTION_BLOCK["PRODUCTION"]
+            PRODUIRE["PRODUIRE<br/>Clément ROUX"]
+            TRAITEMENT["Traitement<br/>de Surface"]
+            PEINTURE_L["Peinture<br/>Liquide"]
+            PEINTURE_P["Peinture<br/>Poudre"]
+            MONTAGE["Montage /<br/>Assemblage"]
+            
+            PRODUIRE --> TRAITEMENT
+            PRODUIRE --> PEINTURE_L
+            PRODUIRE --> PEINTURE_P
+            PRODUIRE --> MONTAGE
+        end
+        
+        COMMERCE --> METHODES
+        METHODES --> PRODUIRE
+    end
+    
+    subgraph SUPPORT["🔧 PROCESSUS SUPPORT"]
+        direction LR
+        ACHATS["ACHATS<br/>Chloé DELMAS<br/><br/>• Approvisionnements<br/>• Fournisseurs"]
+        RH["RESSOURCES<br/>HUMAINES<br/>Angélique LESCURE<br/><br/>• Gestion personnel<br/>• Formation"]
+        FINANCE["AFFAIRES<br/>FINANCIERES<br/>Angélique LESCURE<br/><br/>• Comptabilité<br/>• Facturation"]
+    end
+    
+    CLIENT_IN --> COMMERCE
+    MONTAGE --> CLIENT_OUT
+    
+    PILOTAGE -.->|Pilotage| METIER
+    PILOTAGE -.->|Pilotage| SUPPORT
+    SUPPORT -.->|Support| METIER
+    
+    style PILOTAGE fill:#FFD700,stroke:#333,stroke-width:3px
+    style METIER fill:#87CEEB,stroke:#333,stroke-width:3px
+    style SUPPORT fill:#90EE90,stroke:#333,stroke-width:3px
+    style CLIENT_IN fill:#FF6B6B,stroke:#333,stroke-width:2px
+    style CLIENT_OUT fill:#4ECDC4,stroke:#333,stroke-width:2px
+    style GROUPE fill:#FFA500
+    style MANAGER fill:#FFD700
+    style QUALITE fill:#FFE66D
+    style HSE fill:#FFE66D

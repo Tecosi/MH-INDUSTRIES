@@ -1,0 +1,96 @@
+flowchart TD
+    START([Début: Pièces disponibles])
+    
+    subgraph PREPA["🔧 PREPARATION DE SURFACE"]
+        A1[Réception pièces<br/>+ dossier production]
+        A2[Consultation documentation<br/>Classeurs couleur papier]
+        A3[Dégraissage /<br/>Décapage / Sablage]
+        A4[Contrôles intermédiaires]
+        A5[Préparation au traitement]
+    end
+    
+    subgraph TRAITEMENT["⚗️ TRAITEMENT DE SURFACE"]
+        B1[Consultation gamme process<br/>affichée au poste]
+        B2[Consultation Excel<br/>ordonnancement partagé]
+        B3[Réglage paramètres<br/>Température / Temps / Produit]
+        B4[Passage en ligne / four]
+        B5[Contrôles process<br/>Épaisseur / Adhérence]
+    end
+    
+    subgraph PEINTURE["🎨 PEINTURE (Liquide/Poudre)"]
+        C1[Consultation documentation<br/>Classeurs couleur]
+        C2[Appel appro peinture<br/>par mail]
+        C3[Préparation cabine<br/>Réglage paramètres]
+        C4[Application peinture<br/>Liquide ou Poudre]
+        C5[Passage four polymérisation]
+        C6[Gestion stock peinture<br/>Excel parallèle ERP]
+    end
+    
+    subgraph MONTAGE["🔩 MONTAGE / ASSEMBLAGE"]
+        D1[Réception pièces traitées]
+        D2[Consultation dossier<br/>technique assemblage]
+        D3[Montage / Assemblage<br/>selon gamme]
+        D4[Contrôle assemblage]
+    end
+    
+    START --> A1
+    A1 --> A2
+    A2 --> A3
+    A3 --> A4
+    A4 --> A5
+    
+    A5 --> CHOIX{Type<br/>traitement?}
+    
+    CHOIX -->|Traitement surface| B1
+    CHOIX -->|Peinture| C1
+    
+    B1 --> B2
+    B2 --> B3
+    B3 --> B4
+    B4 --> B5
+    B5 --> FIN_TRAIT[Fin traitement]
+    
+    C1 --> C2
+    C2 --> C3
+    C3 --> C4
+    C4 --> C5
+    C5 --> C6
+    C6 --> FIN_TRAIT
+    
+    FIN_TRAIT --> MONTAGE_Q{Montage<br/>requis?}
+    
+    MONTAGE_Q -->|Oui| D1
+    MONTAGE_Q -->|Non| END
+    
+    D1 --> D2
+    D2 --> D3
+    D3 --> D4
+    D4 --> END([Fin: Vers Contrôle Qualité])
+    
+    subgraph PROBLEMES["⚠️ PROBLEMES IDENTIFIES"]
+        P1["🔴 Documentation papier dispersée<br/>→ Classeurs couleur non numériques"]
+        P2["🔴 Stock peinture déconnecté ERP<br/>→ Gestion parallèle Excel"]
+        P3["🔴 Appels appro par mail<br/>→ Pas d'intégration flux"]
+        P4["🟡 Consultation Excel partagé<br/>→ Ordonnancement non temps réel"]
+    end
+    
+    subgraph ATELIERS["🏭 ATELIERS"]
+        AT1["Atelier Préparation"]
+        AT2["Atelier Traitement Surface"]
+        AT3["Atelier Peinture Liquide"]
+        AT4["Atelier Peinture Poudre"]
+        AT5["Atelier Montage"]
+    end
+    
+    style START fill:#FF6B6B
+    style END fill:#4ECDC4
+    style PREPA fill:#E3F2FD
+    style TRAITEMENT fill:#B2DFDB
+    style PEINTURE fill:#F8BBD0
+    style MONTAGE fill:#DCEDC8
+    style PROBLEMES fill:#FFEBEE,stroke:#D32F2F,stroke-width:2px
+    style ATELIERS fill:#E0F2F1
+    style P1 fill:#FFCDD2
+    style P2 fill:#FFCDD2
+    style P3 fill:#FFCDD2
+    style P4 fill:#FFF9C4

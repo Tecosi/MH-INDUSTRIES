@@ -1,0 +1,93 @@
+flowchart TD
+    START([Début: Commande validée])
+    
+    subgraph PREPARATION["📋 PREPARATION DOCUMENTS"]
+        A1[Edition documents<br/>depuis ERP]
+        A2[Tri par pochette couleur<br/>selon opérations]
+        A3[Transmission aux Méthodes<br/>pour contrôle supplémentaire]
+        A4{Validation<br/>Méthodes?}
+    end
+    
+    subgraph PLANIFICATION["📅 PLANIFICATION INITIALE"]
+        B1[Définition date entrée<br/>/ date sortie]
+        B2[Vérification délais client]
+        B3{Contre-indication<br/>capacité?}
+    end
+    
+    subgraph ORDONNANCEMENT["🗓️ ORDONNANCEMENT"]
+        C1[Ouverture Excel partagé<br/>Chacun son tour]
+        C2[Ajout manuel commande<br/>dans planning]
+        C3[Ventilation manuelle<br/>par atelier]
+        C4[Evaluation subjective<br/>priorités et charge]
+        C5[Gestion EDI en FIFO<br/>depuis encours]
+    end
+    
+    subgraph RECEPTION["📦 RECEPTION PIECES"]
+        D1[Réception pièces client]
+        D2[Validation quantités<br/>sur déclaration client]
+        D3[Pas de comptage détaillé<br/>ni contrôle qualité]
+        D4[Stockage ou file attente]
+    end
+    
+    subgraph APPRO["🔔 APPROVISIONNEMENT"]
+        E1[Appel Prod → Logistique<br/>par mail]
+        E2[Logistique vérifie<br/>disponibilité]
+        E3[Préparation documents<br/>+ pièces]
+        E4[Approvisionnement<br/>au poste]
+    end
+    
+    START --> A1
+    A1 --> A2
+    A2 --> A3
+    A3 --> A4
+    A4 -->|Non conforme| A1
+    A4 -->|OK| B1
+    
+    B1 --> B2
+    B2 --> B3
+    B3 -->|Oui| B1
+    B3 -->|Non| C1
+    
+    C1 --> C2
+    C2 --> C3
+    C3 --> C4
+    C4 --> C5
+    C5 --> D1
+    
+    D1 --> D2
+    D2 --> D3
+    D3 --> D4
+    D4 --> E1
+    
+    E1 --> E2
+    E2 --> E3
+    E3 --> E4
+    E4 --> END([Fin: Vers Production])
+    
+    subgraph PROBLEMES["⚠️ PROBLEMES IDENTIFIES"]
+        P1["🔴 Excel partagé non intégré<br/>→ Pas de vue dynamique capacitaire"]
+        P2["🔴 Ordonnancement manuel<br/>→ Subjectivité + Chronophage"]
+        P3["🔴 Appels appro par mail<br/>→ Rupture flux information"]
+        P4["🟡 Sur-contrôle possible<br/>→ Méthodes + Ordo"]
+    end
+    
+    subgraph OUTILS["🛠️ OUTILS UTILISES"]
+        O1["ERP Clipper"]
+        O2["Excel partagé"]
+        O3["Papier / Mail"]
+        O4["EDI clients"]
+    end
+    
+    style START fill:#FF6B6B
+    style END fill:#4ECDC4
+    style PREPARATION fill:#E3F2FD
+    style PLANIFICATION fill:#FFF9C4
+    style ORDONNANCEMENT fill:#F3E5F5
+    style RECEPTION fill:#E8F5E9
+    style APPRO fill:#FFF3E0
+    style PROBLEMES fill:#FFEBEE,stroke:#D32F2F,stroke-width:2px
+    style OUTILS fill:#E0F2F1
+    style P1 fill:#FFCDD2
+    style P2 fill:#FFCDD2
+    style P3 fill:#FFCDD2
+    style P4 fill:#FFF9C4
