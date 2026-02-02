@@ -1,0 +1,57 @@
+flowchart TD
+    Start([Réception Pièces Clients<br/>à Peindre]) --> A1[Arrivée pièces clients<br/>+ Commande jointe]
+    
+    A1 --> B1{Contrôle Réception<br/>Visuel + Quantitatif}
+    
+    B1 -->|Contrôle OK| C1[Quantité étiquette =<br/>Quantité commande]
+    B1 -->|Contrôle NOK| D1[Anomalie détectée]
+    
+    C1 --> E1[Transmission à ADV<br/>pour saisie]
+    
+    D1 --> F1[Signalement client]
+    F1 --> G1{Réponse client}
+    
+    G1 -->|Acceptation| E1
+    G1 -->|Refus/Retour| H1[Retour pièces client]
+    
+    E1 --> I1[ADV : Saisie commande<br/>dans système]
+    
+    I1 --> J1[Création OF<br/>Traitement de surface]
+    
+    J1 --> K1[Ordonnancement<br/>Planification peinture]
+    
+    K1 --> L1[Production<br/>Préparation surface]
+    
+    L1 --> M1[Production<br/>Traitement peinture]
+    
+    M1 --> N1[Contrôle Qualité<br/>Final]
+    
+    N1 -->|Conforme| O1[Emballage pièces<br/>traitées]
+    N1 -->|Non-conforme| P1[Reprise/Retouche]
+    
+    P1 --> M1
+    
+    O1 --> Q1[Facturation client]
+    
+    Q1 --> R1[Expédition/Livraison<br/>client]
+    
+    R1 --> End([Fin du Processus])
+    H1 --> End
+    
+    style Start fill:#4CAF50,stroke:#2E7D32,color:#fff
+    style End fill:#f44336,stroke:#c62828,color:#fff
+    style B1 fill:#FF9800,stroke:#E65100,color:#fff
+    style D1 fill:#f44336,stroke:#c62828,color:#fff
+    style F1 fill:#f44336,stroke:#c62828,color:#fff
+    style G1 fill:#FF9800,stroke:#E65100,color:#fff
+    style N1 fill:#FF9800,stroke:#E65100,color:#fff
+    style P1 fill:#FFC107,stroke:#F57C00,color:#000
+    style E1 fill:#2196F3,stroke:#1565C0,color:#fff
+    style I1 fill:#2196F3,stroke:#1565C0,color:#fff
+    style J1 fill:#9C27B0,stroke:#6A1B9A,color:#fff
+    style K1 fill:#9C27B0,stroke:#6A1B9A,color:#fff
+    style L1 fill:#673AB7,stroke:#4527A0,color:#fff
+    style M1 fill:#673AB7,stroke:#4527A0,color:#fff
+    style O1 fill:#00BCD4,stroke:#00838F,color:#fff
+    style Q1 fill:#00BCD4,stroke:#00838F,color:#fff
+    style R1 fill:#4CAF50,stroke:#2E7D32,color:#fff
